@@ -1,0 +1,98 @@
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. WriteAndEdit.
+       
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT OUTPUT-FILE ASSIGN TO ASW
+               ORGANIZATION IS LINE SEQUENTIAL.
+           SELECT FILE-LIST ASSIGN TO 'file_list.sh'
+               ORGANIZATION IS LINE SEQUENTIAL.
+       
+       DATA DIVISION.
+       FILE SECTION.
+       FD  OUTPUT-FILE.                                                 
+       01  OUTPUT-RECORD PIC X(80).
+       
+       FD  FILE-LIST.
+       01  FILE-RECORD PIC X(100).
+       
+       WORKING-STORAGE SECTION.
+       01  PHRASE       PIC X(80) VALUE SPACES.
+       01  ASW          PIC X(20) VALUE SPACES.
+       01  ASW2         PIC X(4) VALUE SPACES.
+       01  TETELEC      PIC X VALUE 'N'.
+       01  SHELL-COMMAND PIC X(50) VALUE 'ls'.
+       01  EOF-REACHED  PIC X VALUE 'A'.
+       
+       PROCEDURE DIVISION.
+           PERFORM ASKUSER
+           STOP RUN.
+       
+       WRITE-FILE.
+           OPEN OUTPUT OUTPUT-FILE
+           DISPLAY "Set data to put in the file."
+           ACCEPT PHRASE
+           MOVE PHRASE TO OUTPUT-RECORD
+           WRITE OUTPUT-RECORD
+           CLOSE OUTPUT-FILE
+           DISPLAY "Data written to file."
+           PERFORM ASKUSER.
+       
+       READ-FILE.
+           DISPLAY " "
+           OPEN INPUT OUTPUT-FILE
+           MOVE 'N' TO TETELEC
+           PERFORM UNTIL TETELEC = 'Y'
+               READ OUTPUT-FILE INTO OUTPUT-RECORD
+                   AT END
+                       MOVE 'Y' TO TETELEC
+                   NOT AT END
+                       DISPLAY OUTPUT-RECORD
+               END-PERFORM.
+           CLOSE OUTPUT-FILE
+           
+           PERFORM ASKUSER.
+              
+       
+       LISTING.
+           DISPLAY " "
+           DISPLAY 'List of .dat files:'
+           DISPLAY " "
+           CALL 'SYSTEM' USING SHELL-COMMAND
+           OPEN INPUT FILE-LIST
+           
+           
+           
+           PERFORM ASKUSER.
+       
+       CREATEDIT.
+           DISPLAY "Enter file name to modify/create :"
+           ACCEPT ASW
+           PERFORM ASKUSER.
+       
+       ASKUSER.
+           DISPLAY " "
+           DISPLAY "Select an option for the file:"
+           DISPLAY " WRIT - Write to file"
+           DISPLAY " READ - Read from file"
+           DISPLAY " LIST - List .dat files"
+           DISPLAY " EXIT - To Exit Program"
+           ACCEPT ASW2
+       
+           EVALUATE ASW2
+               WHEN 'WRIT'
+                   PERFORM WRITE-FILE
+               WHEN 'READ'
+                   PERFORM READ-FILE
+               WHEN 'LIST'
+                   PERFORM LISTING
+               WHEN 'EXIT'
+                   DISPLAY "Exiting program."
+               WHEN 'CRED'
+                    PERFORM CREATEDIT
+               WHEN OTHER
+                   DISPLAY "Invalid option. Please try again."
+                   PERFORM ASKUSER
+           END-EVALUATE.
+       
