@@ -6,16 +6,11 @@
        FILE-CONTROL.
            SELECT OUTPUT-FILE ASSIGN TO ASW
                ORGANIZATION IS LINE SEQUENTIAL.
-           SELECT FILE-LIST ASSIGN TO 'file_list.sh'
-               ORGANIZATION IS LINE SEQUENTIAL.
        
        DATA DIVISION.
        FILE SECTION.
        FD  OUTPUT-FILE.                                                 
        01  OUTPUT-RECORD PIC X(80).
-       
-       FD  FILE-LIST.
-       01  FILE-RECORD PIC X(100).
        
        WORKING-STORAGE SECTION.
        01  PHRASE       PIC X(80) VALUE SPACES.
@@ -23,7 +18,6 @@
        01  ASW2         PIC X(4) VALUE SPACES.
        01  TETELEC      PIC X VALUE 'N'.
        01  SHELL-COMMAND PIC X(50) VALUE 'ls'.
-       01  EOF-REACHED  PIC X VALUE 'A'.
        
        PROCEDURE DIVISION.
            PERFORM ASKUSER
@@ -60,24 +54,25 @@
            DISPLAY 'List of .dat files:'
            DISPLAY " "
            CALL 'SYSTEM' USING SHELL-COMMAND
-           OPEN INPUT FILE-LIST
-           
-           
            
            PERFORM ASKUSER.
        
        CREATEDIT.
-           DISPLAY "Enter file name to modify/create :"
+           DISPLAY "Enter file name to Create/Modify :"
            ACCEPT ASW
            PERFORM ASKUSER.
        
        ASKUSER.
            DISPLAY " "
+           DISPLAY " "
            DISPLAY "Select an option for the file:"
-           DISPLAY " WRIT - Write to file"
-           DISPLAY " READ - Read from file"
+           DISPLAY " "
+           DISPLAY " CRED - Create/Modify a file"
+           DISPLAY " WRIT - Write to file selected"
+           DISPLAY " READ - Read from file selected"
            DISPLAY " LIST - List .dat files"
            DISPLAY " EXIT - To Exit Program"
+           DISPLAY " HELP - To get basic additional infos"
            ACCEPT ASW2
        
            EVALUATE ASW2
@@ -91,8 +86,27 @@
                    DISPLAY "Exiting program."
                WHEN 'CRED'
                     PERFORM CREATEDIT
+               WHEN 'HELP'
+                    PERFORM HELP
                WHEN OTHER
                    DISPLAY "Invalid option. Please try again."
                    PERFORM ASKUSER
            END-EVALUATE.
        
+
+
+
+       HELP.
+           DISPLAY " ".
+           DISPLAY " ".
+           DISPLAY " ".
+           DISPLAY " This is the HELP Section"
+           DISPLAY " ".
+           DISPLAY "1. If you attempt to Modify or Read a file without".
+           DISPLAY "creating or select it, the program will display an".
+           DISPLAY "error and close".
+           DISPLAY " ".
+           DISPLAY "2. LIST command will display every file present in".
+           DISPLAY "the directory, whatever its extention".
+           DISPLAY " ".
+           PERFORM ASKUSER.
