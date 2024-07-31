@@ -4,7 +4,7 @@
        ENVIRONMENT DIVISION.
        INPUT-OUTPUT SECTION.
        FILE-CONTROL.
-           SELECT OUTPUT-FILE ASSIGN TO ASW
+           SELECT OUTPUT-FILE ASSIGN TO NOWFILE
                ORGANIZATION IS LINE SEQUENTIAL.
        
        DATA DIVISION.
@@ -13,11 +13,14 @@
        01  OUTPUT-RECORD PIC X(80).
        
        WORKING-STORAGE SECTION.
-       01  PHRASE       PIC X(80) VALUE SPACES.
-       01  ASW          PIC X(20) VALUE SPACES.
-       01  ASW2         PIC X(4) VALUE SPACES.
-       01  TETELEC      PIC X VALUE 'N'.
-       01  SHELL-COMMAND PIC X(50) VALUE 'ls'.
+       01 STUFF.
+           05  PHRASE        PIC X(80) VALUE SPACES.
+           05  ASW           PIC X(4) VALUE SPACES.
+           05  TETELEC       PIC X VALUE 'N'.
+           05  SHELL-COMMAND PIC X(3) VALUE 'ls'.
+           05 DELSTART       PIC X(3) VALUE 'rm '.
+           05 NOWFILE        PIC X(20) VALUE SPACES.
+       66  DELCMD RENAMES DELSTART THRU NOWFILE.
        
        PROCEDURE DIVISION.
            PERFORM ASKUSER
@@ -47,41 +50,44 @@
            CLOSE OUTPUT-FILE
            
            PERFORM ASKUSER.
-              
-       
+     
+
        LISTING.
            DISPLAY " "
            DISPLAY 'List of .dat files:'
            DISPLAY " "
-           CALL 'SYSTEM' USING SHELL-COMMAND
+           CALL 'SYSTEM' USING SHELL-COMMAND.
            
            PERFORM ASKUSER.
        
        CREATEDIT.
            DISPLAY "Enter file name to Create/Modify :"
-           ACCEPT ASW
+           ACCEPT NOWFILE
            PERFORM ASKUSER.
        
        ASKUSER.
            DISPLAY " "
            DISPLAY " "
-           DISPLAY "Select an option for the file:"
+           DISPLAY "Select an option for : "NOWFILE
            DISPLAY " "
            DISPLAY " CRED - Create/Modify a file"
            DISPLAY " WRIT - Write to file selected"
            DISPLAY " READ - Read from file selected"
            DISPLAY " LIST - List .dat files"
+           DISPLAY " DELF - Delete the file you have selected "
            DISPLAY " EXIT - To Exit Program"
            DISPLAY " HELP - To get basic additional infos"
-           ACCEPT ASW2
+           ACCEPT ASW
        
-           EVALUATE ASW2
+           EVALUATE ASW
                WHEN 'WRIT'
                    PERFORM WRITE-FILE
                WHEN 'READ'
                    PERFORM READ-FILE
                WHEN 'LIST'
                    PERFORM LISTING
+               WHEN 'DELF'
+                    PERFORM DELOPERATION
                WHEN 'EXIT'
                    DISPLAY "Exiting program."
                WHEN 'CRED'
@@ -95,6 +101,12 @@
        
 
 
+       DELOPERATION.
+           DISPLAY "Destroying file.."
+           CALL 'SYSTEM' USING DELCMD
+           DISPLAY "File "NOWFILE" is successfully deleted !"
+           PERFORM LISTING.
+
 
        HELP.
            DISPLAY " ".
@@ -103,10 +115,12 @@
            DISPLAY " This is the HELP Section"
            DISPLAY " ".
            DISPLAY "1. If you attempt to Modify or Read a file without".
-           DISPLAY "creating or select it, the program will display an".
+           DISPLAY "creating or select one, the program will display an".
            DISPLAY "error and close".
            DISPLAY " ".
            DISPLAY "2. LIST command will display every file present in".
            DISPLAY "the directory, whatever its extention".
            DISPLAY " ".
+           DISPLAY "3. Careful with the DELF command, it won't ask a ".
+           DISPLAY "second time before deleting the selected file"
            PERFORM ASKUSER.
